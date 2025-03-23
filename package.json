@@ -1,0 +1,24 @@
+{
+  "name": "praca_licencjacka",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "express-ws": "^5.0.2",
+    "mongoose": "^8.12.2",
+    "morgan": "^1.10.0",
+    "passport": "^0.7.0",
+    "passport-json": "^1.2.0",
+    "uuid": "^11.1.0"
+  }
+}
