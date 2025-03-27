@@ -1,85 +1,104 @@
-<script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+<script>
+import common from './mixins/common'
+import LoginDialog from './components/LoginDialog.vue'
+import LogoutDialog from './components/LogoutDialog.vue'
+
+const authEndpoint = '/api/auth'
+
+export default {
+  mixins: [ common ],
+  components: { LoginDialog, LogoutDialog },
+  data() {
+    return {
+      snackbar: { on: false },
+      generalError: false,
+      user: {},
+      loginDialog: false,
+      logoutDialog: false
+    }
+  },
+  methods: {
+    onPopup(text, color = 'success') {
+      this.snackbar.text = text
+      this.snackbar.color = color
+      this.snackbar.on = true
+    },
+    onLogin(text, color = 'success') {
+      this.loginDialog = false
+      this.logoutDialog = false
+      if(color == 'success') {
+        this.whoami()
+        this.$router.push('/')
+      }
+      if(text) {
+        this.onPopup(text, color)
+      }
+    },
+    whoami() {
+      fetch(authEndpoint)
+      .then(res => {
+          if(!res.ok) {
+            this.generalError = true
+            return
+          }
+          res.json().then(data => {
+            if(data.sessionid) {
+              this.user = data
+            } else {
+              this.generalError = true
+            }
+          })
+      })
+      .catch(err => {
+        this.generalError = true
+      })
+    }
+  },
+  mounted() {
+    this.whoami()
+  }
+}
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+  <v-app v-if="!generalError">
 
-    <div class="wrapper">
-      <HelloWorld msg="You did it!" />
+    <v-navigation-drawer expand-on-hover rail permanent>
 
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-      </nav>
-    </div>
-  </header>
+      <v-list nav>
+        <v-list-item v-for="route in $router.options.routes" :to="route.path" :title="route.title" :prepend-icon="route.icon" v-show="!route.roles || checkIfInRole(user, route.roles)" exact></v-list-item>
+      </v-list>
 
-  <RouterView />
+      <v-spacer></v-spacer>
+
+      <v-list nav>
+        <v-list-item key="Login" @click="loginDialog = true" @close="onLogin" prepend-icon="mdi-login" title="Login" exact v-if="!user.username"/>
+        <v-list-item key="Logout" @click="logoutDialog = true" @close="onLogin" prepend-icon="mdi-logout" title="Logout" exact v-if="user.username"/>
+      </v-list>
+
+    </v-navigation-drawer>
+
+    <v-main>
+      <router-view @popup="onPopup" :user="user"></router-view>
+    </v-main>
+
+    <v-dialog v-model="loginDialog" width="33%">
+      <LoginDialog @close="onLogin" />
+    </v-dialog>
+
+    <v-dialog v-model="logoutDialog" width="33%">
+      <LogoutDialog @close="onLogin" />
+    </v-dialog>
+
+    <v-snackbar v-model="snackbar.on" :color="snackbar.color" :timeout="3000">
+      <div style="width: 100%; text-align: center;">{{ snackbar.text }}</div>
+    </v-snackbar>
+
+  </v-app>
+
+  <v-snackbar v-model="generalError" color="error" location="center" timeout="-1">
+    <div style="width: 100%; text-align: center;">Brak połączenia z backendem</div>
+  </v-snackbar>
 </template>
 
-<style scoped>
-header {
-  line-height: 1.5;
-  max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
-}
-
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
-  }
-}
-</style>
+<style scoped></style>

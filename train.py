@@ -18,6 +18,6 @@ if __name__ == "__main__":
     print(f"Ładowany model: {model.model.yaml}")
     # model.train(data=data_yaml_path, epochs=20, imgsz=640, batch=-1, device="cuda")
 
-    # results = modelBest("00056_110.jpg", save=True)  # Testujemy na nowym obrazie
-    # print(modelBest.val())
+    results = modelBest("00056_110.jpg", save=True)  # Testujemy na nowym obrazie
+    print(modelBest.val())
 

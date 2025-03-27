@@ -1,14 +1,43 @@
-import './assets/main.css'
+import './assets/main.css';
+import '@mdi/font/css/materialdesignicons.css';
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createApp } from 'vue';
 
-import App from './App.vue'
-import router from './router'
+// Vuetify
+import 'vuetify/styles';
+import { createVuetify } from 'vuetify';
+import * as components from 'vuetify/components';
+import * as directives from 'vuetify/directives';
 
-const app = createApp(App)
 
-app.use(createPinia())
-app.use(router)
+import App from './App.vue';
 
-app.mount('#app')
+const vuetify = createVuetify({
+    components,
+    directives,
+    icons: {
+        defaultSet: 'mdi'
+    }
+});
+
+// Router
+import type { RouteRecordRaw } from 'vue-router';
+import { createRouter, createWebHashHistory} from 'vue-router';
+import Dashboard from './components/Dashboard.vue';
+
+type CustomRoute = RouteRecordRaw & {
+    title?: string;
+    icon?: string;
+    roles?: number[];
+};
+
+const routes: CustomRoute[] = [
+    { path: '/', component: Dashboard, title: 'Pulpit', icon: 'mdi-home' }
+];
+
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes
+});
+
+createApp(App).use(vuetify).use(router).mount('#app');
