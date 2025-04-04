@@ -2,6 +2,8 @@ import './assets/main.css';
 import '@mdi/font/css/materialdesignicons.css';
 
 import { createApp } from 'vue';
+import { createPinia } from 'pinia' // ✅ Add this line
+
 
 // Vuetify
 import 'vuetify/styles';
@@ -24,6 +26,7 @@ const vuetify = createVuetify({
 import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHashHistory} from 'vue-router';
 import Dashboard from './components/Dashboard.vue';
+import PhotoAnalyzer from './components/PhotoAnalyzer.vue';
 
 type CustomRoute = RouteRecordRaw & {
     title?: string;
@@ -31,8 +34,11 @@ type CustomRoute = RouteRecordRaw & {
     roles?: number[];
 };
 
+const pinia = createPinia() // ✅ Create Pinia instance
+
 const routes: CustomRoute[] = [
-    { path: '/', component: Dashboard, title: 'Pulpit', icon: 'mdi-home' }
+    { path: '/', component: Dashboard, title: 'Pulpit', icon: 'mdi-home' },
+    { path: '/analyzePhoto', component: PhotoAnalyzer, title: 'Analiza zdjęć', icon: 'mdi-image', roles: [0, 1]  }
 ];
 
 const router = createRouter({
@@ -40,4 +46,4 @@ const router = createRouter({
     routes
 });
 
-createApp(App).use(vuetify).use(router).mount('#app');
+createApp(App).use(vuetify).use(pinia).use(router).mount('#app');

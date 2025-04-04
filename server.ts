@@ -13,6 +13,8 @@ import passportJson from 'passport-json'
 import auth from './auth.js';
 import * as websocket from './websocket.js';
 import * as control from './control.js'; // Import the entire control module
+import analyzer from './photoAnalyzer.js'
+
 
 interface Config {
     port: number;
@@ -62,6 +64,9 @@ app.delete(authEndpoint, auth.logout);
 const whoEndpoint = '/api/control';
 app.get(`${whoEndpoint}/who`, auth.checkIfInRole([0, 1]), control.whoGet);
 
+app.post(analyzer.endpoint, analyzer.post)
+
+
 
 
 try {
@@ -78,6 +83,7 @@ mongoose.connect(config.dbUrl)
         console.log('Połączenie z bazą danych nawiązane');
 
         auth.init(conn);
+        analyzer.init(conn.connection);
 
         app.listen(config.port, () => {
             console.log('Backend słucha na porcie', config.port);

@@ -17,8 +17,15 @@ export const websocketHandler = {
     map: websocketMap,
 
     handle: (ws: WebSocket & { sessionID?: string }, req: SessionRequest) => {
-        ws.sessionID = req.sessionID;
-        websocketMap[req.sessionID] = ws;
+
+        const url = new URL(req.url || '', `http://${req.headers.host}`)
+        const sessionID = url.searchParams.get('sessionID')
+
+        if (sessionID) {
+            ws.sessionID = sessionID
+            websocketMap[sessionID] = ws
+            console.log(`WebSocket associated with session ${sessionID}`)
+        }
 
         ws.on('message', (rawData: string) => {
             let data: { to?: string } = {};
