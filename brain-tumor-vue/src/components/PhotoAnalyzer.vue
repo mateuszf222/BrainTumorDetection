@@ -73,7 +73,7 @@ const saveToDatabase = async () => {
   }
 
   const formData = new FormData()
-  formData.append('photo', resultBlob.value)
+  formData.append('photo', resultBlob.value, downloadFilename.value)
   formData.append('firstName', firstName.value)
   formData.append('lastName', lastName.value)
 

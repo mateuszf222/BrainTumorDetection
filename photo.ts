@@ -53,6 +53,7 @@ const photo: {
   init: (conn: Connection) => void
   post: any[]
   save: any[]
+  get: any[]
   } = {
   endpoint: '/api/photo',
   model: null,
@@ -85,9 +86,9 @@ const photo: {
         res.send(result) // from FastAPI
 
         // Clean up uploaded file
-        // fs.unlink(req.file.path, (err) => {
-        //   if (err) console.error('Failed to delete uploaded file:', err)
-        // })
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete uploaded file:', err)
+        })
   
       } catch (err: any) {
         res.status(500).json({ error: err.message })
@@ -118,7 +119,7 @@ const photo: {
   
         const item = new photo.model!({
           fileName: req.file.filename,
-          originalName: req.file.originalName,
+          originalName: req.file.originalname,
           firstName,
           lastName,
           photoData: buffer
@@ -130,16 +131,42 @@ const photo: {
         await item.save()
 
         // Clean up uploaded file
-        // fs.unlink(req.file.path, (err) => {
-        //   if (err) console.error('Failed to delete uploaded file:', err)
-        // })
+        fs.unlink(req.file.path, (err) => {
+          if (err) console.error('Failed to delete uploaded file:', err)
+        })
   
         res.json({ success: true })
       } catch (err: any) {
         res.status(500).json({ error: err.message })
       }
     }
+  ],
+  // Add to your `photo` object in photo.ts
+  get: [
+    async (req, res) => {
+      try {
+        const { firstName, lastName, date } = req.query;
+
+        const query: any = {};
+        if (firstName) query.firstName = new RegExp(firstName as string, 'i');
+        if (lastName) query.lastName = new RegExp(lastName as string, 'i');
+        if (date) {
+          const parsed = new Date(date as string);
+          if (!isNaN(parsed.getTime())) {
+            const nextDay = new Date(parsed);
+            nextDay.setDate(parsed.getDate() + 1);
+            query.uploadDate = { $gte: parsed, $lt: nextDay };
+          }
+        }
+
+        const results = await photo.model!.find(query)
+        res.json(results);
+      } catch (err: any) {
+        res.status(500).json({ error: err.message });
+      }
+    }
   ]
+
   
 }
 export default photo;
