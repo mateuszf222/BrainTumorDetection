@@ -79,6 +79,17 @@ onMounted(() => {
                 style="max-width: 120px; max-height: 120px; border: 1px solid #ccc;"
               />
             </td>
+            <td>
+                <v-btn
+                v-if="item.photoUrl"
+                :href="item.photoUrl"
+                :download="item.originalName || 'analyzed.jpg'"
+                color="secondary"
+                size="small"
+                >
+                Pobierz
+                </v-btn>
+            </td>
           </tr>
         </tbody>
       </v-table>
