@@ -20,25 +20,30 @@ if (!fs.existsSync(uploadPath)) {
 
 
 // Configure multer
-const upload = multer({
+export const upload = multer({
   dest: uploadPath
 })
+
 
 interface AnalyzerDoc {
   _id: string
   fileName: string
-  originalName?: string
+  originalName: string
   uploadDate: Date
-  result: string
+  firstName: string
+  lastName: string
+  photoData: Buffer
 }
 
 
 const schema = new Schema<AnalyzerDoc>({
   _id: { type: String, default: uuidv4 },
   fileName: { type: String, required: true },
-  originalName: { type: String },
+  originalName: String,
   uploadDate: { type: Date, default: Date.now },
-  result: { type: String }
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  photoData: { type: Buffer, required: true } // Store binary image data
 })
 
 
@@ -47,13 +52,14 @@ const analyzer: {
   model: Model<AnalyzerDoc> | null
   init: (conn: Connection) => void
   post: any[]
+  save: any[]
   } = {
   endpoint: '/api/analyzer',
   model: null,
     
 
   init: conn => {
-    analyzer.model = conn.model('analyzer', schema)
+    analyzer.model = conn.model('photos', schema)
   },
 
   post: [
@@ -74,11 +80,48 @@ const analyzer: {
         )
   
         const result = fastApiResponse.data
+
+        res.setHeader('Content-Type', 'image/jpeg')
+        res.send(result) // from FastAPI
+
+        // Clean up uploaded file
+        // fs.unlink(req.file.path, (err) => {
+        //   if (err) console.error('Failed to delete uploaded file:', err)
+        // })
+  
+      } catch (err: any) {
+        res.status(500).json({ error: err.message })
+      }
+    }
+  ],
+  save: [
+    upload.single('photo'),
+    async (req, res) => {
+      try {
+        const { firstName, lastName } = req.body
+  
+        if (!req.file || !firstName || !lastName) {
+          return res.status(400).json({ error: 'Brak wymaganych danych' })
+        }
+        const buffer = fs.readFileSync(req.file.path)     // ✅
+
+        
+
+        console.log("req.file.path  "+req.file.path)
+
+        console.log('Saving analyzed image:', req.file?.originalname)
+
+
+        // console.log("REQ ",req)
+        // console.log("REQ.BODY ",req.body)    
+        console.log("REQ.FILE ",req.file)
   
         const item = new analyzer.model!({
           fileName: req.file.filename,
-          originalName: req.file.originalname,
-          result
+          originalName: req.file.originalName,
+          firstName,
+          lastName,
+          photoData: buffer
         })
   
         const err = item.validateSync()
@@ -87,17 +130,16 @@ const analyzer: {
         await item.save()
 
         // Clean up uploaded file
-        fs.unlink(req.file.path, (err) => {
-          if (err) console.error('Failed to delete uploaded file:', err)
-        })
-
-        res.setHeader('Content-Type', 'image/jpeg')
-        res.send(result) // from FastAPI
+        // fs.unlink(req.file.path, (err) => {
+        //   if (err) console.error('Failed to delete uploaded file:', err)
+        // })
   
+        res.json({ success: true })
       } catch (err: any) {
         res.status(500).json({ error: err.message })
       }
     }
   ]
+  
 }
 export default analyzer;

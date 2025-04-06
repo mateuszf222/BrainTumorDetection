@@ -8,6 +8,14 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 const downloadFilename = ref<string | null>(null)
 
+const firstName = ref('')
+const lastName = ref('')
+const resultBlob = ref<Blob | null>(null)
+const saved = ref(false)
+
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+
 
 const handleFileChange = (e: Event) => {
   const target = e.target as HTMLInputElement
@@ -33,6 +41,9 @@ const analyzePhoto = async () => {
 
   const formData = new FormData()
   formData.append('photo', file.value)
+  formData.append('firstName', firstName.value)
+  formData.append('lastName', lastName.value)
+
 
   try {
     const res = await fetch('/api/analyzer', {
@@ -43,7 +54,9 @@ const analyzePhoto = async () => {
     if (!res.ok) throw new Error('Nie udało się przetworzyć obrazu')
 
     const blob = await res.blob()
+    resultBlob.value = blob
     resultImageUrl.value = URL.createObjectURL(blob)
+
   
 
   } catch (err: any) {
@@ -52,6 +65,57 @@ const analyzePhoto = async () => {
     loading.value = false
   }
 }
+
+const saveToDatabase = async () => {
+  if (!resultBlob.value || !firstName.value || !lastName.value || !downloadFilename.value) {
+    error.value = 'Uzupełnij wszystkie pola'
+    return  
+  }
+
+  const formData = new FormData()
+  formData.append('photo', resultBlob.value)
+  formData.append('firstName', firstName.value)
+  formData.append('lastName', lastName.value)
+
+  console.log('Sending blob:', resultBlob.value)
+
+
+  try {
+    const res = await fetch('/api/analyzer/save', {
+      method: 'POST',
+      body: formData
+    })
+
+    if (!res.ok) throw new Error('Błąd zapisu do bazy')
+
+    saved.value = true
+    error.value = null
+
+    // ✅ Wait a second then reset UI
+    setTimeout(() => {
+      resetForm()
+    }, 3000)
+
+  } catch (err: any) {
+    error.value = err.message
+  }
+}
+
+const resetForm = () => {
+  file.value = null
+  previewUrl.value = null
+  resultImageUrl.value = null
+  resultBlob.value = null
+  firstName.value = ''
+  lastName.value = ''
+  saved.value = false
+
+  if (fileInputRef.value) {
+  // Clear Vuetify internal file value
+  (fileInputRef.value as any).reset()
+  }
+}
+
 
 </script>
 
@@ -62,6 +126,8 @@ const analyzePhoto = async () => {
   <v-card-text>
     <v-file-input
       accept="image/*"
+      ref="fileInputRef"
+      v-model="file"
       label="Wybierz zdjęcie"
       @change="handleFileChange"
       outlined
@@ -90,13 +156,32 @@ const analyzePhoto = async () => {
       Analizuj zdjęcie
     </v-btn>
 
-    <div v-if="resultImageUrl"   class="mt-6">
-      <p><strong>Wynik analizy:</strong></p>
-      <img :src="resultImageUrl" alt="Wynik analizy" style="max-width: 100%; max-height: 400px;" />
-      <v-btn class="mt-2" color="secondary" :href="resultImageUrl" :download=downloadFilename>
-        Pobierz wynik
-      </v-btn>
-    </div>
+    <div v-if="resultImageUrl" class="mt-6">
+    <p><strong>Wynik analizy:</strong></p>
+    <img :src="resultImageUrl" alt="Wynik analizy" style="max-width: 100%; max-height: 400px;" />
+
+    <!-- New: Save Section -->
+    <v-text-field v-model="firstName" label="Imię pacjenta" class="mt-4" />
+    <v-text-field v-model="lastName" label="Nazwisko pacjenta" />
+    <v-btn color="success" class="mt-2" @click="saveToDatabase">
+      Zapisz do bazy
+    </v-btn>
+
+    <v-btn
+      class="mt-2"
+      color="secondary"
+      :href="resultImageUrl"
+      :download="downloadFilename"
+    >
+      Pobierz wynik
+    </v-btn>
+
+
+    <v-alert type="success" v-if="saved" class="mt-2" style="width: 100%;">
+      Dane zapisane w bazie!
+    </v-alert>
+  </div>
+
 
     <v-alert
       v-if="error"

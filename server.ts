@@ -65,6 +65,9 @@ const whoEndpoint = '/api/control';
 app.get(`${whoEndpoint}/who`, auth.checkIfInRole([0, 1]), control.whoGet);
 
 app.post(analyzer.endpoint, analyzer.post)
+app.post(`${analyzer.endpoint}/save`, analyzer.save)
+
+
 
 
 
