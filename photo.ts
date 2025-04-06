@@ -47,19 +47,19 @@ const schema = new Schema<AnalyzerDoc>({
 })
 
 
-const analyzer: {
+const photo: {
   endpoint: string
   model: Model<AnalyzerDoc> | null
   init: (conn: Connection) => void
   post: any[]
   save: any[]
   } = {
-  endpoint: '/api/analyzer',
+  endpoint: '/api/photo',
   model: null,
     
 
   init: conn => {
-    analyzer.model = conn.model('photos', schema)
+    photo.model = conn.model('photos', schema)
   },
 
   post: [
@@ -116,7 +116,7 @@ const analyzer: {
         // console.log("REQ.BODY ",req.body)    
         console.log("REQ.FILE ",req.file)
   
-        const item = new analyzer.model!({
+        const item = new photo.model!({
           fileName: req.file.filename,
           originalName: req.file.originalName,
           firstName,
@@ -142,4 +142,4 @@ const analyzer: {
   ]
   
 }
-export default analyzer;
+export default photo;

@@ -27,6 +27,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import { createRouter, createWebHashHistory} from 'vue-router';
 import Dashboard from './components/Dashboard.vue';
 import PhotoAnalyzer from './components/PhotoAnalyzer.vue';
+import PhotoResultViewer from './components/PhotoResultViewer.vue';
 
 type CustomRoute = RouteRecordRaw & {
     title?: string;
@@ -38,7 +39,8 @@ const pinia = createPinia() // ✅ Create Pinia instance
 
 const routes: CustomRoute[] = [
     { path: '/', component: Dashboard, title: 'Pulpit', icon: 'mdi-home' },
-    { path: '/analyzePhoto', component: PhotoAnalyzer, title: 'Analiza zdjęć', icon: 'mdi-image', roles: [0, 1]  }
+    { path: '/analyzePhoto', component: PhotoAnalyzer, title: 'Analiza zdjęć', icon: 'mdi-image', roles: [0, 1]  },
+    { path: '/viewPhotoResult', component: PhotoResultViewer, title: 'Podgląd wyników zdjęć', icon: 'mdi-image-search', roles: [0, 1]  }
 ];
 
 const router = createRouter({

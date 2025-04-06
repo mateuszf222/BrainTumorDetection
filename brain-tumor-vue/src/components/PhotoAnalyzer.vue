@@ -46,7 +46,7 @@ const analyzePhoto = async () => {
 
 
   try {
-    const res = await fetch('/api/analyzer', {
+    const res = await fetch('/api/photo', {
       method: 'POST',
       body: formData
     })
@@ -81,7 +81,7 @@ const saveToDatabase = async () => {
 
 
   try {
-    const res = await fetch('/api/analyzer/save', {
+    const res = await fetch('/api/photo/save', {
       method: 'POST',
       body: formData
     })
