@@ -5,14 +5,24 @@ from fastapi.responses import JSONResponse, FileResponse
 import uvicorn
 import tempfile
 import os
+from fastapi import BackgroundTasks
+import shutil 
+
 
 app = FastAPI()
 
 @app.post("/analyze")
-async def analyze_image(photo: UploadFile = File(...)):
+async def analyze_image(
+    photo: UploadFile = File(...),
+    background_tasks: BackgroundTasks = None
+):
     contents = await photo.read()
     photo_name=photo.filename
     output_path = run_tumor_detection(contents)
+
+    # Schedule file deletion after response is sent
+    background_tasks.add_task(cleanup_file, output_path)
+
     return FileResponse(output_path, media_type="image/jpg", filename=photo_name)
 
 # Your AI logic goes here
@@ -37,6 +47,15 @@ def run_tumor_detection(image_bytes):
     result_path = os.path.join(result_dir, result_filename)  # full path
 
     return result_path  # 👈 return this to FastAPI handler
+
+def cleanup_file(path: str):
+    try:
+        dir_path = os.path.dirname(path)  
+        shutil.rmtree(dir_path)
+        print(f"Deleted folder: {dir_path}")
+    except Exception as e:
+        print(f"Failed to delete {path}: {e}")
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8001)
