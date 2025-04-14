@@ -1,15 +1,24 @@
-<script>
-import common from '../mixins/common'
+<script setup lang="ts">
+import { computed } from 'vue'
 
-    export default {
-        props: [ 'user' ],
-        emits: [ 'popup' ],
-        mixins: [ common ]
-    }
+// Define props
+interface User {
+  username?: string
+}
+const props = defineProps<{ user: User }>()
+
+// Optional: computed property if needed
+const isLoggedIn = computed(() => !!props.user?.username)
 </script>
 
 <template>
+  <section>
     <h1>Pulpit</h1>
-    <p v-if="user.username">{{ user.username }}</p>
-    <i v-if="!user.username">niezalogowany</i>
+
+    <p v-if="isLoggedIn">{{ props.user.username }}</p>
+    <i v-else>niezalogowany</i>
+  </section>
 </template>
+
+<style scoped>
+</style>

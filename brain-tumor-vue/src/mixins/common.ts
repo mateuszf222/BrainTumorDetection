@@ -4,12 +4,12 @@ const getIntersection = <T>(array1: T[], array2: T[]): T[] => {
 };
 
 interface Session {
-    roles?: string[];
+    roles?: number[];
 }
 
 const common = {
     methods: {
-        checkIfInRole(session: Session, roles: string[]): boolean {
+        checkIfInRole(session: Session, roles: number[]): boolean {
             const intersection = getIntersection(session.roles || [], roles || []);
             return intersection.length > 0;
         }

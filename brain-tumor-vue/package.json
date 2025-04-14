@@ -19,7 +19,7 @@
     "pinia": "^3.0.1",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "vuetify": "^3.7.18"
+    "vuetify": "^3.8.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.51.0",
@@ -40,9 +40,12 @@
     "jsdom": "^26.0.0",
     "npm-run-all2": "^7.0.2",
     "prettier": "3.5.3",
+    "sass": "^1.86.3",
     "typescript": "~5.8.0",
+    "unplugin-vue-components": "^28.4.1",
     "vite": "^6.2.1",
     "vite-plugin-vue-devtools": "^7.7.2",
+    "vite-plugin-vuetify": "^2.1.1",
     "vitest": "^3.0.8",
     "vue-tsc": "^2.2.8"
   }

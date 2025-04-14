@@ -4,6 +4,10 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
 import vueDevTools from 'vite-plugin-vue-devtools'
+import Components from 'unplugin-vue-components/vite'
+import { VuetifyResolver } from 'unplugin-vue-components/resolvers'
+import vuetify from 'vite-plugin-vuetify'
+
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -11,6 +15,10 @@ export default defineConfig({
     vue(),
     vueJsx(),
     vueDevTools(),
+    vuetify({ autoImport: true }), // enable auto-imports
+    Components({
+      resolvers: [VuetifyResolver()] // Optional: loads styles
+    })
   ],
   resolve: {
     alias: {

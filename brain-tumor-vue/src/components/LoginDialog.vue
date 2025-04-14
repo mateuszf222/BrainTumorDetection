@@ -1,45 +1,44 @@
-<script>
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useSnackbarStore } from '../stores/snackbar'
 
-    const authEndpoint = '/api/auth'
+const snackbar = useSnackbarStore()
+const emit = defineEmits(['close'])
 
-    export default {
-        data() {
-            return {
-                isValid: false,
-                input: { username: '', password: '' },
-                rules: {
-                    required: value => {
-                        return value.length > 0 || 'Pole wymagane'
-                    }
-                }
-            }
-        },
-        emits: [ 'close' ],
-        methods: {
-           send() {
-              fetch(authEndpoint, {
-                method: 'POST',
-                headers: { 'Content-type': 'application/json' },
-                body: JSON.stringify(this.input)
-              }).then(res => {
-                res.json().then(data => {
-                    if(!res.ok) {
-                        this.$emit('close', data.error, 'error')
-                    } else {
-                        this.input = {}
-                        this.$emit('close', 'Zalogowano')
-                    }
-                }).catch(err => {
-                    console.error(err)
-                    this.$emit('close', 'Brak połączenia z backendem', 'error')
-                })
-              })
-           },
-           close() {
-                this.$emit('close')
-           }  
-        }
+const authEndpoint = '/api/auth'
+
+const isValid = ref(false)
+const input = ref({ username: '', password: '' })
+
+const rules = {
+  required: (value: string) => value.length > 0 || 'Pole wymagane'
+}
+
+const send = async () => {
+  try {
+    const res = await fetch(authEndpoint, {
+      method: 'POST',
+      headers: { 'Content-type': 'application/json' },
+      body: JSON.stringify(input.value)
+    })
+
+    const data = await res.json()
+
+    if (!res.ok) {
+      snackbar.show(data.error || 'Błąd logowania', 'error')
+    } else {
+      input.value = { username: '', password: '' }
+      snackbar.show('Zalogowano', 'success')
+      emit('close')
     }
+  } catch (err) {
+    snackbar.show('Brak połączenia z backendem', 'error')
+  }
+}
+
+const close = () => {
+  emit('close')
+}
 </script>
 
 <template>
@@ -64,3 +63,4 @@
 
 <style scoped>
 </style>
+

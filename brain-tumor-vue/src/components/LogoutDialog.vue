@@ -1,30 +1,32 @@
-<script>
+<script setup lang="ts">
+import { useSnackbarStore } from '../stores/snackbar'
 
-    const authEndpoint = '/api/auth'
+const snackbar = useSnackbarStore()
+const emit = defineEmits(['close'])
 
-    export default {
-        emits: [ 'close' ],
-        methods: {
-           logout() {
-              fetch(authEndpoint, {
-                method: 'DELETE'
-              }).then(res => {
-                res.json().then(data => {
-                    if(!res.ok) {
-                        this.$emit('close', data.error, 'error')
-                    } else {
-                        this.$emit('close', 'Wylogowano')
-                    }
-                }).catch(err => {
-                    this.$emit('close', 'Brak połączenia z backendem', 'error')
-                })
-              })
-           },
-           close() {
-                this.$emit('close')
-           }  
-        }
+const authEndpoint = '/api/auth'
+
+const logout = async () => {
+  try {
+    const res = await fetch(authEndpoint, {
+      method: 'DELETE'
+    })
+    const data = await res.json()
+
+    if (!res.ok) {
+      snackbar.show(data.error || 'Błąd wylogowania', 'error')
+    } else {
+      snackbar.show('Wylogowano', 'success')
+      emit('close')
     }
+  } catch (err) {
+    snackbar.show('Brak połączenia z backendem', 'error')
+  }
+}
+
+const close = () => {
+  emit('close')
+}
 </script>
 
 <template>

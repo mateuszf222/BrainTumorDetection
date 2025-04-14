@@ -1,79 +1,63 @@
-<script>
+<script setup lang="ts">
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useSnackbarStore } from './stores/snackbar'
+import { useWebSocketStore } from './stores/websocket'
 import common from './mixins/common'
-import LoginDialog from './components/LoginDialog.vue'
-import LogoutDialog from './components/LogoutDialog.vue'
-import { useWebSocketStore } from './stores/websocket' // <-- Pinia store
+
+// Setup
+const snackbar = useSnackbarStore()
+const wsStore = useWebSocketStore()
+const router = useRouter()
+
+// Data
+const user = ref<any>({})
+const loginDialog = ref(false)
+const logoutDialog = ref(false)
 
 const authEndpoint = '/api/auth'
 
-export default {
-  mixins: [ common ],
-  components: { LoginDialog, LogoutDialog },
-  data() {
-    return {
-      snackbar: { on: false },
-      generalError: false,
-      user: {},
-      loginDialog: false,
-      logoutDialog: false
-    }
-  },
-  methods: {
-    onPopup(text, color = 'success') {
-      this.snackbar.text = text
-      this.snackbar.color = color
-      this.snackbar.on = true
-    },
-    onLogin(text, color = 'success') {
-      this.loginDialog = false
-      this.logoutDialog = false
-      if (color === 'success') {
-        this.whoami()
-      }
-      if (text) {
-        this.onPopup(text, color)
-      }
-    },
-    whoami() {
-      const wsStore = useWebSocketStore()
-
-      fetch(authEndpoint)
-        .then(res => {
-          if (!res.ok) {
-            this.generalError = true
-            return
-          }
-          res.json().then(data => {
-            if (data.sessionid) {
-              this.user = data
-              wsStore.connect(data.sessionid) // ✅ connect WebSocket via Pinia store
-            } else {
-              this.generalError = true
-            }
-          })
-        })
-        .catch(() => {
-          this.generalError = true
-        })
-    }
-  },
-  computed: {
-    visibleRoutes() {
-      return this.$router.options.routes.filter(route =>
-        !route.roles || this.checkIfInRole(this.user, route.roles)
-      )
-    }
-  },
-  mounted() {
-    this.whoami()
+// Methods
+const onLogin = (color: string = 'success') => {
+  loginDialog.value = false
+  logoutDialog.value = false
+  if (color === 'success') {
+    whoami()
   }
 }
+
+const whoami = async () => {
+  try {
+    const res = await fetch(authEndpoint)
+    if (!res.ok) return
+
+    const data = await res.json()
+    if (data.sessionid) {
+      user.value = data
+      wsStore.connect(data.sessionid)
+    }
+  } catch (err) {
+    console.error('Failed to fetch user:', err)
+  }
+}
+
+// Computed
+const visibleRoutes = computed(() => {
+  return router.options.routes.filter(route =>
+    !route.meta?.roles || common.methods.checkIfInRole(user.value, route.meta.roles as number[])
+  )
+})
+
+// Lifecycle
+onMounted(() => {
+  whoami()
+})
 </script>
 
 
 
 <template>
-  <v-app v-if="!generalError">
+  <v-app>
 
     <v-navigation-drawer expand-on-hover rail permanent>
 
@@ -82,8 +66,8 @@ export default {
           v-for="route in visibleRoutes"
           :key="route.path"
           :to="route.path"
-          :title="route.title"
-          :prepend-icon="route.icon"
+          :title="route.meta?.title"
+          :prepend-icon="route.meta?.icon"
           exact
         />
       </v-list>
@@ -98,24 +82,24 @@ export default {
     </v-navigation-drawer>
 
     <v-main>
-      <router-view @popup="onPopup" :user="user"></router-view>
+      <router-view :user="user"></router-view>
     </v-main>
 
     <v-dialog v-model="loginDialog" width="33%" attach="body">
-      <LoginDialog @close="onLogin" />
+      <LoginDialog @close="onLogin"/>
     </v-dialog>
 
     <v-dialog v-model="logoutDialog" width="33%" attach="body">
       <LogoutDialog @close="onLogin" />
     </v-dialog>
 
-    <v-snackbar v-model="snackbar.on" :color="snackbar.color" :timeout="3000">
+    <v-snackbar
+      v-model="snackbar.visible"
+      :color="snackbar.color"
+      :timeout="snackbar.timeout"
+    >
       <div style="width: 100%; text-align: center;">{{ snackbar.text }}</div>
     </v-snackbar>
-
-  <v-snackbar v-model="generalError" color="error" location="center" timeout="-1">
-    <div style="width: 100%; text-align: center;">Brak połączenia z backendem</div>
-  </v-snackbar>
   
   </v-app>
 </template>

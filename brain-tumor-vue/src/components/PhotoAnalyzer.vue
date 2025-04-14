@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useSnackbarStore } from '../stores/snackbar'
+const snackbar = useSnackbarStore()
 
 const file = ref<File | null>(null)
 const previewUrl = ref<string | null>(null)
 const resultImageUrl = ref<string | null>(null)
 const loading = ref(false)
-const error = ref<string | null>(null)
 const downloadFilename = ref<string | null>(null)
 
 const firstName = ref('')
 const lastName = ref('')
 const resultBlob = ref<Blob | null>(null)
-const saved = ref(false)
 
 const fileInputRef = ref<HTMLInputElement | null>(null)
 
@@ -23,7 +23,6 @@ const handleFileChange = (e: Event) => {
     file.value = target.files[0]
     previewUrl.value = URL.createObjectURL(file.value)
     resultImageUrl.value = null
-    error.value = null
 
     // 👇 Set the download filename
     const originalName = file.value.name.replace(/\.[^/.]+$/, '') // remove extension
@@ -37,7 +36,6 @@ const analyzePhoto = async () => {
 
   loading.value = true
   resultImageUrl.value = null
-  error.value = null
 
   const formData = new FormData()
   formData.append('photo', file.value)
@@ -57,10 +55,10 @@ const analyzePhoto = async () => {
     resultBlob.value = blob
     resultImageUrl.value = URL.createObjectURL(blob)
 
-  
+    snackbar.show('Zdjęcie przeanalizowane!', 'success')
 
   } catch (err: any) {
-    error.value = err.message
+    snackbar.show(err.message || 'Błąd podczas analizy', 'error')
   } finally {
     loading.value = false
   }
@@ -68,7 +66,7 @@ const analyzePhoto = async () => {
 
 const saveToDatabase = async () => {
   if (!resultBlob.value || !firstName.value || !lastName.value || !downloadFilename.value) {
-    error.value = 'Uzupełnij wszystkie pola'
+    snackbar.show('Uzupełnij wszystkie pola', 'error')
     return  
   }
 
@@ -88,8 +86,7 @@ const saveToDatabase = async () => {
 
     if (!res.ok) throw new Error('Błąd zapisu do bazy')
 
-    saved.value = true
-    error.value = null
+    snackbar.show('Dane zapisane w bazie!', 'success')
 
     // ✅ Wait a second then reset UI
     setTimeout(() => {
@@ -97,7 +94,7 @@ const saveToDatabase = async () => {
     }, 3000)
 
   } catch (err: any) {
-    error.value = err.message
+    snackbar.show(err.message || 'Błąd zapisu', 'error')
   }
 }
 
@@ -108,7 +105,6 @@ const resetForm = () => {
   resultBlob.value = null
   firstName.value = ''
   lastName.value = ''
-  saved.value = false
 
   if (fileInputRef.value) {
   // Clear Vuetify internal file value
@@ -160,7 +156,6 @@ const resetForm = () => {
     <p><strong>Wynik analizy:</strong></p>
     <img :src="resultImageUrl" alt="Wynik analizy" style="max-width: 100%; max-height: 400px;" />
 
-    <!-- New: Save Section -->
     <v-text-field v-model="firstName" label="Imię pacjenta" class="mt-4" />
     <v-text-field v-model="lastName" label="Nazwisko pacjenta" />
     <v-btn color="success" class="mt-2" @click="saveToDatabase">
@@ -175,23 +170,7 @@ const resetForm = () => {
     >
       Pobierz wynik
     </v-btn>
-
-
-    <v-alert type="success" v-if="saved" class="mt-2" style="width: 100%;">
-      Dane zapisane w bazie!
-    </v-alert>
   </div>
-
-
-    <v-alert
-      v-if="error"
-      class="mt-4"
-      type="error"
-      border="start"
-      prominent
-    >
-      {{ error }}
-    </v-alert>
   </v-card-text>
   </v-card>
 </template>
