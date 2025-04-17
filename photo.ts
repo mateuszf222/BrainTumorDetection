@@ -143,29 +143,53 @@ const photo: {
   ],
   // Add to your `photo` object in photo.ts
   get: [
-    async (req, res) => {
-      try {
-        const { firstName, lastName, date } = req.query;
+  async (req, res) => {
+    try {
+      const {
+        firstName,
+        lastName,
+        startDate,
+        endDate,
+        page = 1,
+        itemsPerPage = 5,
+        sortBy = 'uploadDate',
+        sortDesc = 'false'
+      } = req.query
 
-        const query: any = {};
-        if (firstName) query.firstName = new RegExp(firstName as string, 'i');
-        if (lastName) query.lastName = new RegExp(lastName as string, 'i');
-        if (date) {
-          const parsed = new Date(date as string);
-          if (!isNaN(parsed.getTime())) {
-            const nextDay = new Date(parsed);
-            nextDay.setDate(parsed.getDate() + 1);
-            query.uploadDate = { $gte: parsed, $lt: nextDay };
-          }
+      const query: any = {}
+      if (firstName) query.firstName = new RegExp(firstName as string, 'i')
+      if (lastName) query.lastName = new RegExp(lastName as string, 'i')
+      if (startDate && endDate) {
+        const from = new Date(startDate as string);
+        const to = new Date(endDate as string);
+        if (!isNaN(from.getTime()) && !isNaN(to.getTime())) {
+          // Include the full day of the end date by setting time to end of the day
+          to.setHours(23, 59, 59, 999);
+          query.uploadDate = { $gte: from, $lte: to };
         }
-
-        const results = await photo.model!.find(query)
-        res.json(results);
-      } catch (err: any) {
-        res.status(500).json({ error: err.message });
       }
+
+      const allowedSortFields = ['uploadDate', 'firstName', 'lastName', 'originalName'];
+      const sortField = allowedSortFields.includes(sortBy as string) ? sortBy : 'uploadDate';
+      const sortOrder = sortDesc === 'true' ? -1 : 1;
+
+      const skip = (parseInt(page as string) - 1) * parseInt(itemsPerPage as string)
+      const limit = parseInt(itemsPerPage as string)
+
+      const [items, total] = await Promise.all([
+        photo.model!.find(query)
+          .sort({ [sortField]: sortOrder })
+          .skip(skip)
+          .limit(limit),
+        photo.model!.countDocuments(query)
+      ])
+
+      res.json({ items, total })
+    } catch (err: any) {
+      res.status(500).json({ error: err.message })
     }
-  ]
+  }
+]
 
   
 }
