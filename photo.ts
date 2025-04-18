@@ -173,14 +173,23 @@ const photo: {
       const sortField = allowedSortFields.includes(sortBy as string) ? sortBy : 'uploadDate';
       const sortOrder = sortDesc === 'true' ? -1 : 1;
 
-      const skip = (parseInt(page as string) - 1) * parseInt(itemsPerPage as string)
-      const limit = parseInt(itemsPerPage as string)
+      /* -------- pagination logic -------- */
+      const perPage = parseInt(itemsPerPage as string)   // could be -1
+      const pageNum = parseInt(page as string)
 
+      let cursor = photo.model!.find(query)
+                          .sort({ [sortField as string]: sortOrder })
+
+      // when perPage = -1 (“Wszystkie”) we skip limit/skip → return all
+      if (perPage !== -1) {
+        cursor = cursor
+          .skip((pageNum - 1) * perPage)
+          .limit(perPage)
+      }
+
+      /* -------- execute query & count -------- */
       const [items, total] = await Promise.all([
-        photo.model!.find(query)
-          .sort({ [sortField]: sortOrder })
-          .skip(skip)
-          .limit(limit),
+        cursor,
         photo.model!.countDocuments(query)
       ])
 

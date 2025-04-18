@@ -3,6 +3,8 @@ import { ref, watch } from 'vue'
 import Datepicker from '@vuepic/vue-datepicker'
 import '@vuepic/vue-datepicker/dist/main.css'
 
+type SortItem = { key: string; order: 'asc' | 'desc' }
+
 const items = ref<any[]>([])
 const searchFirstName = ref('')
 const searchLastName = ref('')
@@ -13,21 +15,20 @@ const totalItems = ref(0)
 const options = ref({
   page: 1,
   itemsPerPage: 5,
-  sortBy: ['uploadDate'],
-  sortDesc: [true],
+  sortBy: <SortItem[]>[{ key: 'uploadDate', order: 'desc' }] // 👈 ONE array
 })
 
 const onOptionsUpdate = (o: Partial<typeof options.value>) => {
-  // if Vuetify sent no sort, keep the existing one
-  const hasSort = o.sortBy && o.sortBy.length
+  // ⚠️ Vuetify’s first event still has an empty sort array
+  const hasSort = o.sortBy && o.sortBy.length            // ← bring the guard back
 
   Object.assign(options.value, {
     page        : o.page         ?? options.value.page,
     itemsPerPage: o.itemsPerPage ?? options.value.itemsPerPage,
-    sortBy      : hasSort ? o.sortBy  : options.value.sortBy,
-    sortDesc    : hasSort ? o.sortDesc: options.value.sortDesc,
+    sortBy      : hasSort ? o.sortBy : options.value.sortBy   // ← keep previous
   })
 }
+
 
 
 const fetchData = async () => {
@@ -37,16 +38,11 @@ const fetchData = async () => {
   params.append('page', options.value.page.toString())
   params.append('itemsPerPage', options.value.itemsPerPage.toString())
 
+  /* ⇨ sort block becomes trivial */
   if (options.value.sortBy.length) {
-    // Vuetify gives objects like { key: 'uploadDate', order: 'asc' }
-    const first = options.value.sortBy[0] as any        // object or string
-    const field = typeof first === 'string' ? first : first.key
-    const desc  = typeof first === 'string'
-                  ? options.value.sortDesc[0]          // legacy path
-                  : first.order === 'desc'
-
-    params.append('sortBy', field)
-    params.append('sortDesc', desc ? 'true' : 'false')
+    const { key, order } = options.value.sortBy[0]
+    params.append('sortBy',   key)
+    params.append('sortDesc', order === 'desc' ? 'true' : 'false')
   }
 
 
@@ -56,9 +52,6 @@ const fetchData = async () => {
     params.append('startDate', searchDateRange.value[0].toISOString().split('T')[0])
     params.append('endDate', searchDateRange.value[1].toISOString().split('T')[0])
   }
-
-  console.log('🔍 Fetching with sortBy:', options.value.sortBy)
-  console.log('🔃 sortDesc:', options.value.sortDesc)
 
 
   try {
@@ -91,10 +84,8 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => JSON.stringify([options.value.sortBy, options.value.sortDesc, options.value.page, options.value.itemsPerPage]),
-  fetchData
-)
+watch(options, fetchData, { deep: true })   // deep instead of JSON.stringify
+
 
 
 
@@ -128,6 +119,11 @@ watch(
         :items="items"
         :loading="loading"
         :items-per-page="5"
+        :items-per-page-options="[
+            5, 10, 50, 100,
+            { value: -1, title: 'Wszystkie' }
+        ]"
+        v-bind:items-per-page-text="'Elementów na stronę:'"
         :items-length="totalItems"
         :must-sort="true"
         class="mt-4"
