@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4, validate } from 'uuid'
 import { Schema, model, Model, Connection } from 'mongoose'
 import multer from 'multer'
 import fs from 'fs'
@@ -40,7 +40,7 @@ const schema = new Schema<AnalyzerDoc>({
   _id: { type: String, default: uuidv4 },
   fileName: { type: String, required: true },
   originalName: String,
-  uploadDate: { type: Date, default: Date.now },
+  uploadDate: { type: Date, default: Date.now , transform: value => value.toISOString().substr(0, 24)},
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   photoData: { type: Buffer, required: true } // Store binary image data
@@ -54,6 +54,8 @@ const photo: {
   post: any[]
   save: any[]
   get: any[]
+  put: any[]
+  delete: any[]
   } = {
   endpoint: '/api/photo',
   model: null,
@@ -90,6 +92,47 @@ const photo: {
           if (err) console.error('Failed to delete uploaded file:', err)
         })
   
+      } catch (err: any) {
+        res.status(500).json({ error: err.message })
+      }
+    }
+  ],
+  put: [
+    async (req, res) => {
+      try {
+        const { _id, firstName, lastName, uploadDate } = req.body
+        if (!_id) return res.status(400).json({ error: 'Brak identyfikatora (_id)' })
+  
+        const updated = await photo.model!.findByIdAndUpdate(
+          _id,
+          { firstName, lastName, uploadDate },
+          { new: true }
+        )
+  
+        if (!updated) return res.status(404).json({ error: 'Nie znaleziono rekordu' })
+  
+        res.json(updated)
+      } catch (err: any) {
+        res.status(500).json({ error: err.message })
+      }
+    }
+  ],
+  delete: [
+    async (req, res) => {
+      try {
+        const { _id } = req.query
+  
+        if (!_id || typeof _id !== 'string') {
+          return res.status(400).json({ error: 'Brak identyfikatora (_id)' })
+        }
+  
+        const deleted = await photo.model!.findByIdAndDelete(_id)
+  
+        if (!deleted) {
+          return res.status(404).json({ error: 'Nie znaleziono rekordu do usunięcia' })
+        }
+  
+        res.json(deleted)
       } catch (err: any) {
         res.status(500).json({ error: err.message })
       }

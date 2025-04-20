@@ -17,6 +17,7 @@ declare module 'vue' {
     LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
     LogoutDialog: typeof import('./src/components/LogoutDialog.vue')['default']
     PhotoAnalyzer: typeof import('./src/components/PhotoAnalyzer.vue')['default']
+    PhotoResultEditor: typeof import('./src/components/PhotoResultEditor.vue')['default']
     PhotoResultViewer: typeof import('./src/components/PhotoResultViewer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

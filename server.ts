@@ -67,9 +67,8 @@ app.get(`${whoEndpoint}/who`, auth.checkIfInRole([0, 1]), control.whoGet);
 app.post(photo.endpoint, photo.post)
 app.post(`${photo.endpoint}/save`, photo.save)
 app.get(photo.endpoint, photo.get)
-
-
-
+app.put(photo.endpoint, photo.put)
+app.delete(photo.endpoint, photo.delete)
 
 
 

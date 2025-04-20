@@ -12,6 +12,23 @@ const searchDateRange = ref<[Date, Date] | null>(null)
 const loading = ref(false)
 const totalItems = ref(0)
 
+const dialog = ref(false)
+const selectedItem = ref<any | null>(null)
+
+const openEditor = (item: any, event: any) => {
+  selectedItem.value = event.item
+  dialog.value = true
+}
+
+const closeEditor = () => {
+  dialog.value = false
+  selectedItem.value = null
+}
+
+const handleListChanged = () => {
+  fetchData()
+}
+
 const options = ref({
   page: 1,
   itemsPerPage: 5,
@@ -132,13 +149,22 @@ watch(options, fetchData, { deep: true })   // deep instead of JSON.stringify
           { title: 'Nazwisko', key: 'lastName' },
           { title: 'Data', key: 'uploadDate' },
           { title: 'Plik', key: 'originalName', sortable: false },
-          { title: 'Podgląd', key: 'photoUrl', sortable: false },
-          { title: 'Akcje', key: 'actions', sortable: false }
+          { title: 'Podgląd', key: 'photoUrl', sortable: false }
         ]"
+        @click:row="openEditor"
+
       >
         <template v-slot:[`item.uploadDate`]="{ item }">
-          {{ new Date(item.uploadDate).toLocaleString() }}
+          {{ new Date(item.uploadDate).toLocaleDateString('pl-PL', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          }) }}
         </template>
+
 
         <template v-slot:[`item.photoUrl`]="{ item }">
           <img
@@ -148,23 +174,20 @@ watch(options, fetchData, { deep: true })   // deep instead of JSON.stringify
             style="max-width: 120px; max-height: 120px; border: 1px solid #ccc;"
           />
         </template>
-
-        <template v-slot:[`item.actions`]="{ item }">
-          <v-btn
-            v-if="item.photoUrl"
-            :href="item.photoUrl"
-            :download="item.originalName || 'analyzed.jpg'"
-            color="secondary"
-            size="small"
-          >
-            Pobierz
-          </v-btn>
-        </template>
       </v-data-table-server>
 
       <p v-if="!items.length && !loading" class="mt-4">Brak wyników.</p>
     </v-card-text>
   </v-card>
+
+  <v-dialog v-model="dialog" max-width="600px">
+  <PhotoResultEditor
+      :photo="selectedItem"
+      @close="closeEditor"
+      @listChanged="handleListChanged"
+  />
+  </v-dialog>
+
 </template>
 
 
