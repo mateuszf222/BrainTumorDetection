@@ -1,5 +1,11 @@
 import './assets/main.css';
 import '@mdi/font/css/materialdesignicons.css';
+import IconBrainLogo from './components/icons/IconBrainLogo.vue'
+import IconHome from './components/icons/IconHome.vue'
+import IconPhotoAnalyze from './components/icons/IconPhotoAnalyze.vue'
+import IconPhotoResult from './components/icons/IconPhotoResult.vue'
+import IconLogout from './components/icons/IconLogout.vue'
+import IconLogin from './components/icons/IconLogin.vue';
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia' // ✅ Add this line
@@ -31,10 +37,11 @@ import PhotoResultViewer from './components/PhotoResultViewer.vue';
 
 import 'vue-router'
 
+
 declare module 'vue-router' {
   interface RouteMeta {
     title?: string
-    icon?: string
+    icon?: string | object
     roles?: number[]
   }
 }
@@ -45,23 +52,33 @@ const routes: RouteRecordRaw[] = [
     {
       path: '/',
       component: Dashboard,
-      meta: { title: 'Pulpit', icon: 'mdi-home' }
+      meta: { title: 'Pulpit', icon: IconHome }
     },
     {
       path: '/analyzePhoto',
       component: PhotoAnalyzer,
-      meta: { title: 'Analiza zdjęć', icon: 'mdi-image', roles: [0, 1] }
+      meta: { title: 'Analiza zdjęć', icon: IconPhotoAnalyze , roles: [0, 1] }
     },
     {
       path: '/viewPhotoResult',
       component: PhotoResultViewer,
-      meta: { title: 'Podgląd wyników zdjęć', icon: 'mdi-image-search', roles: [0, 1] }
+      meta: { title: 'Podgląd wyników zdjęć', icon: IconPhotoResult, roles: [0, 1] }
     }
   ];
 
 const router = createRouter({
     history: createWebHashHistory(),
-    routes
+    routes  
 });
 
-createApp(App).use(vuetify).use(pinia).use(router).mount('#app');
+
+
+const app = createApp(App).use(vuetify).use(pinia).use(router);
+
+app.component('IconBrainLogo', IconBrainLogo)
+app.component('IconHome',IconHome)
+app.component('IconPhotoAnalyze',IconPhotoAnalyze)
+app.component('IconPhotoResult',IconPhotoResult)
+app.component('IconLogout',IconLogout)
+app.component('IconLogin',IconLogin)
+app.mount('#app');

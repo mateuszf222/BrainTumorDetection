@@ -75,8 +75,31 @@ onMounted(() => {
       <v-spacer></v-spacer>
 
       <v-list nav>
-        <v-list-item key="Login" @click="loginDialog = true" @close="onLogin" prepend-icon="mdi-login" title="Login" exact v-if="!user.username"/>
-        <v-list-item key="Logout" @click="logoutDialog = true" @close="onLogin" prepend-icon="mdi-logout" title="Logout" exact v-if="user.username"/>
+        <v-list-item 
+          key="Login" 
+          @click="loginDialog = true"
+          @close="onLogin" 
+          title="Logowanie" 
+          exact 
+          v-if="!user.username">
+          <template #prepend>
+            <IconLogin class="mr-8" />
+          </template>
+        </v-list-item>
+
+        <v-list-item
+          key="Logout"
+          @click="logoutDialog = true"
+          @close="onLogin"
+          title="Wylogowanie"
+          exact
+          v-if="user.username"
+        >
+          <template #prepend>
+            <IconLogout class="mr-8" />
+          </template>
+        </v-list-item>
+
       </v-list>
 
     </v-navigation-drawer>

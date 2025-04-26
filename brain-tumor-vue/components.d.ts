@@ -9,9 +9,15 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Dashboard: typeof import('./src/components/Dashboard.vue')['default']
+    IconBrainLogo: typeof import('./src/components/icons/IconBrainLogo.vue')['default']
     IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']
+    IconHome: typeof import('./src/components/icons/IconHome.vue')['default']
+    IconLogin: typeof import('./src/components/icons/IconLogin.vue')['default']
+    IconLogout: typeof import('./src/components/icons/IconLogout.vue')['default']
+    IconPhotoAnalyze: typeof import('./src/components/icons/IconPhotoAnalyze.vue')['default']
+    IconPhotoResult: typeof import('./src/components/icons/IconPhotoResult.vue')['default']
     IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
     IconTooling: typeof import('./src/components/icons/IconTooling.vue')['default']
     LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
