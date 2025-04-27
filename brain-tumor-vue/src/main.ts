@@ -64,7 +64,7 @@ const routes: RouteRecordRaw[] = [
       component: PhotoResultViewer,
       meta: { title: 'Podgląd wyników zdjęć', icon: IconPhotoResult, roles: [0, 1] }
     }
-  ];
+];
 
 const router = createRouter({
     history: createWebHashHistory(),

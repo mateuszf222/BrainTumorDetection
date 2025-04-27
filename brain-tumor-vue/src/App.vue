@@ -105,7 +105,7 @@ onMounted(() => {
     </v-navigation-drawer>
 
     <v-main>
-      <router-view :user="user"></router-view>
+      <router-view :user="user"></router-view> 
     </v-main>
 
     <v-dialog v-model="loginDialog" width="33%" attach="body">

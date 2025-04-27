@@ -73,7 +73,17 @@ const fetchData = async () => {
 
   try {
     const res = await fetch(`/api/photo?${params.toString()}`)
-    if (!res.ok) throw new Error('Błąd pobierania danych')
+    if (res.status === 401) {
+      console.warn('🔒 Unauthorized access to /api/photo')
+      items.value = []        // Empty list
+      totalItems.value = 0
+      loading.value = false
+      return                  // Stop further execution
+    }
+
+    if (!res.ok) {
+      throw new Error('Błąd pobierania danych')
+    }
 
     const data = await res.json()
     console.log(`✅ Received ${data.items?.length || 0} items`)

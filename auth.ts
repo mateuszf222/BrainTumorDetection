@@ -94,7 +94,8 @@ const auth = {
 
     checkIfInRole: (roleNums: number[]) => (req: Request, res: Response, next: NextFunction) :void=> {
         if (!req.isAuthenticated()) {
-            res.status(401).json({ error: 'Unauthorized' });
+            res.status(401).json({ error: 'Unauthorized' });  // <-- important RETURN
+            return;
         }
         
         const userRoles = req.user ? (req.user as IUser).roles || [] : [];
