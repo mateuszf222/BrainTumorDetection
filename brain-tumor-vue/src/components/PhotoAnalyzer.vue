@@ -116,7 +116,7 @@ const resetForm = () => {
 </script>
 
 <template>
-  <v-card class="pa-4" max-width="800" outlined>
+  <v-card class="pa-4" max-width="800" outlined style="position: relative; top: 100px; left: 100px">
   <v-card-title>Analiza zdjęcia</v-card-title>
 
   <v-card-text>

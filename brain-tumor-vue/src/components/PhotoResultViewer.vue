@@ -121,7 +121,7 @@ watch(options, fetchData, { deep: true })   // deep instead of JSON.stringify
 </script>
 
 <template>
-  <v-card class="pa-4" max-width="1200" outlined>
+  <v-card class="pa-4" max-width="1200" outlined style="position: relative; top: 100px; left: 100px;">
     <v-card-title>Wyniki analizy</v-card-title>
     <v-card-text>
       <v-text-field v-model="searchFirstName" label="Imię pacjenta" />

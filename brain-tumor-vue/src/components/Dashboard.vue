@@ -16,10 +16,9 @@ const isLoggedIn = computed(() => !!props.user?.username)
   <v-card
   class="pa-4"
   outlined
-  style="position: fixed; top: 50px; left: 100px;"
+  max-width="150"
+  style="position: relative; top: 100px; left: 100px;"
   >
-    
-  <IconBrainLogo class="w-3 h-3 mr-2" />
   <h1 class="text-2xl font-semibold">Pulpit</h1>
   
     <p v-if="isLoggedIn">{{ props.user.username }}</p>

@@ -64,124 +64,107 @@ onMounted(() => {
 <template>
   <v-app>
 
-    <v-navigation-drawer
-      expand-on-hover
-      rail
-      permanent
-      class="pa-4 rounded-xl bg-gray-100 shadow-md"
-    >
+    <!-- TOP NAVIGATION BAR -->
+    <v-app-bar app class="bg-gray-100 shadow-md px-6">
+      <v-toolbar-title class="font-bold text-lg">
+        <!-- Optional: Logo or App Name -->
+        <IconBrainLogo class="w-14 h-14 ml-4" />
+      </v-toolbar-title>
 
+      <v-spacer />
 
-    <v-list nav density="comfortable">
-      <v-list-item
-        v-for="route in visibleRoutes"
-        :key="route.path"
-        :to="route.path"
-        variant="plain"
-        class="rounded-lg mb-2 group transition-colors duration-200"
-        exact
-      >
-        <template #prepend>
-          <component
-            :is="route.meta?.icon"
-            :class="[
-              'mr-4 w-5 h-5 text-gray-600 group-hover:text-blue-600',
-              { 'text-blue-600': isActiveRoute(route.path) }
-            ]"
-          />
-        </template>
+      <!-- Navigation Links -->
+      <v-list class="flex flex-row space-x-8" nav density="comfortable">
+        <v-list-item
+          v-for="route in visibleRoutes"
+          :key="route.path"
+          :to="route.path"
+          variant="plain"
+          class="group transition-colors duration-200"
+          exact
+        >
+          <template #prepend>
+            <component
+              :is="route.meta?.icon"
+              :class="[
+                'mr-2 w-5 h-5 text-gray-600 group-hover:text-blue-600',
+                { 'text-blue-600': isActiveRoute(route.path) }
+              ]"
+            />
+          </template>
 
-        <template #title>
-          <div
-            :class="[
-              'text-sm font-medium',
-              isActiveRoute(route.path) ? 'text-blue-600' : 'text-gray-500',
-              'group-hover:text-blue-600'
-            ]"
-          >
-            {{ route.meta?.title }}
-          </div>
-        </template>
-      </v-list-item>
-    </v-list>
+          <template #title>
+            <div
+              :class="[
+                'text-sm font-medium',
+                isActiveRoute(route.path) ? 'text-blue-600' : 'text-gray-500',
+                'group-hover:text-blue-600'
+              ]"
+            >
+              {{ route.meta?.title }}
+            </div>
+          </template>
+        </v-list-item>
 
+        <!-- LOGIN / LOGOUT -->
+        <v-list-item
+          key="Login"
+          v-if="!user.username"
+          @click="loginDialog = true"
+          variant="plain"
+          class="group transition-colors duration-200"
+        >
+          <template #prepend>
+            <IconLogin class="mr-2 w-5 h-5 group-hover:text-blue-600" />
+          </template>
+          <template #title>
+            <div class="text-sm font-medium group-hover:text-blue-600">
+              Logowanie
+            </div>
+          </template>
+        </v-list-item>
 
-    <v-spacer></v-spacer>
+        <v-list-item
+          key="Logout"
+          v-else
+          @click="logoutDialog = true"
+          variant="plain"
+          class="group transition-colors duration-200"
+        >
+          <template #prepend>
+            <IconLogout class="mr-2 w-5 h-5 group-hover:text-blue-600" />
+          </template>
+          <template #title>
+            <div class="text-sm font-medium group-hover:text-blue-600">
+              Wylogowanie
+            </div>
+          </template>
+        </v-list-item>
 
-    <v-list nav density="comfortable">
-      <v-list-item
-        key="Login"
-        @click="loginDialog = true"
-        @close="onLogin"
-        variant="plain"
-        class="rounded-lg mb-2 group transition-colors duration-200"
-        v-if="!user.username"
-      >
-        <template #prepend>
-          <IconLogin class="mr-3" />
-        </template>
+      </v-list>
+    </v-app-bar>
 
-        <template #title>
-          <div
-            :class="[
-              'text-sm font-medium',
-              'group-hover:text-blue-600'
-            ]"
-          >
-            Logowanie
-          </div>
-        </template>
-      </v-list-item>
-
-      <v-list-item
-        key="Logout"
-        @click="logoutDialog = true"
-        @close="onLogin"
-        variant="plain"
-        class="rounded-lg mb-2 group transition-colors duration-200"
-        v-if="user.username"
-      >
-        <template #prepend>
-          <IconLogout class="mr-3" />
-        </template>
-
-        <template #title>
-          <div
-            :class="[
-              'text-sm font-medium',
-              'group-hover:text-blue-600'
-            ]"
-          >
-            Wylogowanie
-          </div>
-        </template>
-      </v-list-item>
-    </v-list>
-
-
-    </v-navigation-drawer>
-
-    <v-main>
-      <router-view :user="user"></router-view> 
+    <!-- MAIN CONTENT -->
+    <v-main class="pt-16">
+      <router-view :user="user"></router-view>
     </v-main>
 
+    <!-- Dialogs -->
     <v-dialog v-model="loginDialog" width="33%" attach="body">
-      <LoginDialog @close="onLogin"/>
+      <LoginDialog @close="onLogin" />
     </v-dialog>
 
     <v-dialog v-model="logoutDialog" width="33%" attach="body">
       <LogoutDialog @close="onLogin" />
     </v-dialog>
 
-    <v-snackbar
-      v-model="snackbar.visible"
-      :color="snackbar.color"
-      :timeout="snackbar.timeout"
-    >
-      <div style="width: 100%; text-align: center;">{{ snackbar.text }}</div>
+    <!-- Snackbar -->
+    <v-snackbar v-model="snackbar.visible" :color="snackbar.color" :timeout="snackbar.timeout">
+      <div class="text-center w-full">{{ snackbar.text }}</div>
     </v-snackbar>
-  
+
   </v-app>
 </template>
+
 
 <style scoped></style>
