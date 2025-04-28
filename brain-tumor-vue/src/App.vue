@@ -48,6 +48,11 @@ const visibleRoutes = computed(() => {
   )
 })
 
+const isActiveRoute = (path: string) => {
+  return router.currentRoute.value.path === path
+}
+
+
 // Lifecycle
 onMounted(() => {
   whoami()
@@ -59,48 +64,100 @@ onMounted(() => {
 <template>
   <v-app>
 
-    <v-navigation-drawer expand-on-hover rail permanent>
+    <v-navigation-drawer
+      expand-on-hover
+      rail
+      permanent
+      class="pa-4 rounded-xl bg-gray-100 shadow-md"
+    >
 
-      <v-list nav>
-        <v-list-item
-          v-for="route in visibleRoutes"
-          :key="route.path"
-          :to="route.path"
-          :title="route.meta?.title"
-          :prepend-icon="route.meta?.icon"
-          exact
-        />
-      </v-list>
 
-      <v-spacer></v-spacer>
+    <v-list nav density="comfortable">
+      <v-list-item
+        v-for="route in visibleRoutes"
+        :key="route.path"
+        :to="route.path"
+        variant="plain"
+        class="rounded-lg mb-2 group transition-colors duration-200"
+        exact
+      >
+        <template #prepend>
+          <component
+            :is="route.meta?.icon"
+            :class="[
+              'mr-4 w-5 h-5 text-gray-600 group-hover:text-blue-600',
+              { 'text-blue-600': isActiveRoute(route.path) }
+            ]"
+          />
+        </template>
 
-      <v-list nav>
-        <v-list-item 
-          key="Login" 
-          @click="loginDialog = true"
-          @close="onLogin" 
-          title="Logowanie" 
-          exact 
-          v-if="!user.username">
-          <template #prepend>
-            <IconLogin class="mr-8" />
-          </template>
-        </v-list-item>
+        <template #title>
+          <div
+            :class="[
+              'text-sm font-medium',
+              isActiveRoute(route.path) ? 'text-blue-600' : 'text-gray-500',
+              'group-hover:text-blue-600'
+            ]"
+          >
+            {{ route.meta?.title }}
+          </div>
+        </template>
+      </v-list-item>
+    </v-list>
 
-        <v-list-item
-          key="Logout"
-          @click="logoutDialog = true"
-          @close="onLogin"
-          title="Wylogowanie"
-          exact
-          v-if="user.username"
-        >
-          <template #prepend>
-            <IconLogout class="mr-8" />
-          </template>
-        </v-list-item>
 
-      </v-list>
+    <v-spacer></v-spacer>
+
+    <v-list nav density="comfortable">
+      <v-list-item
+        key="Login"
+        @click="loginDialog = true"
+        @close="onLogin"
+        variant="plain"
+        class="rounded-lg mb-2 group transition-colors duration-200"
+        v-if="!user.username"
+      >
+        <template #prepend>
+          <IconLogin class="mr-3" />
+        </template>
+
+        <template #title>
+          <div
+            :class="[
+              'text-sm font-medium',
+              'group-hover:text-blue-600'
+            ]"
+          >
+            Logowanie
+          </div>
+        </template>
+      </v-list-item>
+
+      <v-list-item
+        key="Logout"
+        @click="logoutDialog = true"
+        @close="onLogin"
+        variant="plain"
+        class="rounded-lg mb-2 group transition-colors duration-200"
+        v-if="user.username"
+      >
+        <template #prepend>
+          <IconLogout class="mr-3" />
+        </template>
+
+        <template #title>
+          <div
+            :class="[
+              'text-sm font-medium',
+              'group-hover:text-blue-600'
+            ]"
+          >
+            Wylogowanie
+          </div>
+        </template>
+      </v-list-item>
+    </v-list>
+
 
     </v-navigation-drawer>
 
