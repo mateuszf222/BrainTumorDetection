@@ -68,7 +68,11 @@ onMounted(() => {
     <v-app-bar app class="bg-gray-100 shadow-md px-6">
       <v-toolbar-title class="font-bold text-lg">
         <!-- Optional: Logo or App Name -->
-        <IconBrainLogo class="w-14 h-14 ml-4" />
+        <IconBrainLogo 
+          class="w-14 h-14 ml-4 cursor-pointer hover:opacity-80 transition-opacity duration-200" 
+          @click="router.push('/')" 
+        />
+
       </v-toolbar-title>
 
       <v-spacer />
@@ -96,7 +100,7 @@ onMounted(() => {
           <template #title>
             <div
               :class="[
-                'text-sm font-medium',
+                'text-lg font-medium tracking-wide',
                 isActiveRoute(route.path) ? 'text-blue-600' : 'text-gray-500',
                 'group-hover:text-blue-600'
               ]"
@@ -118,7 +122,7 @@ onMounted(() => {
             <IconLogin class="mr-2 w-5 h-5 group-hover:text-blue-600" />
           </template>
           <template #title>
-            <div class="text-sm font-medium group-hover:text-blue-600">
+            <div class="text-lg font-medium tracking-wide group-hover:text-blue-600">
               Logowanie
             </div>
           </template>
@@ -135,7 +139,7 @@ onMounted(() => {
             <IconLogout class="mr-2 w-5 h-5 group-hover:text-blue-600" />
           </template>
           <template #title>
-            <div class="text-sm font-medium group-hover:text-blue-600">
+            <div class="text-lg font-medium tracking-wide group-hover:text-blue-600">
               Wylogowanie
             </div>
           </template>
