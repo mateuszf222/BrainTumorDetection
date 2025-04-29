@@ -136,6 +136,7 @@ watch(options, fetchData, { deep: true })   // deep instead of JSON.stringify
         auto-apply
         placeholder="Zakres dat"
         class="mb-4"
+        teleport="body"
       />
 
 
