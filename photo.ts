@@ -33,6 +33,7 @@ interface AnalyzerDoc {
   firstName: string
   lastName: string
   photoData: Buffer
+  userId: string                
 }
 
 
@@ -43,7 +44,8 @@ const schema = new Schema<AnalyzerDoc>({
   uploadDate: { type: Date, default: Date.now , transform: value => value.toISOString().substr(0, 24)},
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  photoData: { type: Buffer, required: true } // Store binary image data
+  photoData: { type: Buffer, required: true }, // Store binary image data
+  userId: { type: String, required: true } 
 })
 
 
@@ -165,7 +167,8 @@ const photo: {
           originalName: req.file.originalname,
           firstName,
           lastName,
-          photoData: buffer
+          photoData: buffer,
+          userId: (req.user as any)?._id   // ✅ associate photo with user
         })
   
         const err = item.validateSync()
@@ -199,7 +202,10 @@ const photo: {
         sortDesc = 'false'
       } = req.query
 
-      const query: any = {}
+      const userId = (req.user as any)?._id
+      if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+
+      const query: any = {userId}
       if (firstName) query.firstName = new RegExp(firstName as string, 'i')
       if (lastName) query.lastName = new RegExp(lastName as string, 'i')
       if (startDate && endDate) {
