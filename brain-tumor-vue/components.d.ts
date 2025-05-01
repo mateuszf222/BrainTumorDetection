@@ -18,6 +18,7 @@ declare module 'vue' {
     IconLogout: typeof import('./src/components/icons/IconLogout.vue')['default']
     IconPhotoAnalyze: typeof import('./src/components/icons/IconPhotoAnalyze.vue')['default']
     IconPhotoResult: typeof import('./src/components/icons/IconPhotoResult.vue')['default']
+    IconRegister: typeof import('./src/components/icons/IconRegister.vue')['default']
     IconSupport: typeof import('./src/components/icons/IconSupport.vue')['default']
     IconTooling: typeof import('./src/components/icons/IconTooling.vue')['default']
     LoginDialog: typeof import('./src/components/LoginDialog.vue')['default']
@@ -25,6 +26,7 @@ declare module 'vue' {
     PhotoAnalyzer: typeof import('./src/components/PhotoAnalyzer.vue')['default']
     PhotoResultEditor: typeof import('./src/components/PhotoResultEditor.vue')['default']
     PhotoResultViewer: typeof import('./src/components/PhotoResultViewer.vue')['default']
+    RegisterDialog: typeof import('./src/components/RegisterDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

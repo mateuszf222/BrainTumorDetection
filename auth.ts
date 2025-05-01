@@ -130,6 +130,33 @@ const auth = {
 
     logout: (req: Request, res: Response) => req.logout(() => auth.whoami(req, res)),
 
+    register: async (req: Request, res: Response) => {
+        const { username, password } = req.body
+        if (!username || !password) {
+          return res.status(400).json({ error: 'Username and password are required' })
+        }
+      
+        try {
+          const existingUser = await auth.User!.findOne({ username })
+          if (existingUser) {
+            return res.status(409).json({ error: 'Username already exists' })
+          }
+      
+          const newUser = new auth.User!({
+            username,
+            password: makeHash(password),
+            roles: [0] // default admin role
+          })
+      
+          await newUser.save()
+          res.status(201).json({ message: 'User registered successfully' })
+        } catch (err) {
+          console.error(err)
+          res.status(500).json({ error: 'Registration failed' })    
+        }   
+    },
+      
+
     whoami: (req: Request, res: Response) => {
         req.session.roles = req.user ? (req.user as IUser).roles : [];
         req.session.save(() => {

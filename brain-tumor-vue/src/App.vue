@@ -4,6 +4,8 @@ import { useRouter } from 'vue-router'
 import { useSnackbarStore } from './stores/snackbar'
 import { useWebSocketStore } from './stores/websocket'
 import common from './mixins/common'
+import IconRegister from './components/icons/IconRegister.vue'
+
 
 // Setup
 const snackbar = useSnackbarStore()
@@ -14,6 +16,7 @@ const router = useRouter()
 const user = ref<any>({})
 const loginDialog = ref(false)
 const logoutDialog = ref(false)
+const registerDialog = ref(false)
 
 const authEndpoint = '/api/auth'
 
@@ -21,6 +24,7 @@ const authEndpoint = '/api/auth'
 const onLogin = (color: string = 'success') => {
   loginDialog.value = false
   logoutDialog.value = false
+  registerDialog.value = false
   if (color === 'success') {
     whoami()
   }
@@ -128,6 +132,8 @@ onMounted(() => {
           </template>
         </v-list-item>
 
+        
+
         <v-list-item
           key="Logout"
           v-else
@@ -145,6 +151,24 @@ onMounted(() => {
           </template>
         </v-list-item>
 
+        <v-list-item
+          key="Register"
+          v-if="!user.username"
+          @click="registerDialog = true"
+          variant="plain"
+          class="group transition-colors duration-200"
+        >
+          <template #prepend>
+            <IconRegister class="mr-2 w-5 h-5 group-hover:text-blue-600"/>
+          </template>
+          <template #title>
+            <div class="text-lg font-medium tracking-wide group-hover:text-blue-600">
+              Rejestracja
+            </div>
+          </template>
+        </v-list-item>
+
+
       </v-list>
     </v-app-bar>
 
@@ -160,6 +184,10 @@ onMounted(() => {
 
     <v-dialog v-model="logoutDialog" width="33%" attach="body">
       <LogoutDialog @close="onLogin" />
+    </v-dialog>
+
+    <v-dialog v-model="registerDialog" width="33%" attach="body">
+      <RegisterDialog @close="onLogin" />
     </v-dialog>
 
     <!-- Snackbar -->

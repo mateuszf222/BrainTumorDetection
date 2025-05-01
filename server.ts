@@ -58,6 +58,9 @@ wsApp.ws(wsEndpoint, (_ws, req, next) => session(req as Request, {} as Response,
 const authEndpoint = '/api/auth';
 app.get(authEndpoint, auth.whoami);
 app.post(authEndpoint, passport.authenticate('json', { failWithError: true }), auth.login, auth.errorHandler);
+app.post(`${authEndpoint}/register`, (req, res, next) => {
+    auth.register(req, res).catch(next);
+});
 app.delete(authEndpoint, auth.logout);
 
 // Endpointy stanu systemu
