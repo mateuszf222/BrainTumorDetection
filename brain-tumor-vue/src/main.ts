@@ -6,6 +6,7 @@ import IconPhotoAnalyze from './components/icons/IconPhotoAnalyze.vue'
 import IconPhotoResult from './components/icons/IconPhotoResult.vue'
 import IconLogout from './components/icons/IconLogout.vue'
 import IconLogin from './components/icons/IconLogin.vue';
+import IconChat from './components/icons/IconChat.vue';
 
 import { createApp } from 'vue';
 import { createPinia } from 'pinia' // ✅ Add this line
@@ -34,6 +35,7 @@ import { createRouter, createWebHashHistory} from 'vue-router';
 import Dashboard from './components/Dashboard.vue';
 import PhotoAnalyzer from './components/PhotoAnalyzer.vue';
 import PhotoResultViewer from './components/PhotoResultViewer.vue';
+import Chat from './components/Chat.vue';
 
 import 'vue-router'
 
@@ -63,7 +65,8 @@ const routes: RouteRecordRaw[] = [
       path: '/viewPhotoResult',
       component: PhotoResultViewer,
       meta: { title: 'Podgląd wyników zdjęć', icon: IconPhotoResult, roles: [0, 1] }
-    }
+    },
+    { path: '/chat', component: Chat, meta: { title: 'Czat', icon: IconChat, roles: [0, 1] } }, // ✅ Add this line
 ];
 
 const router = createRouter({
@@ -81,4 +84,5 @@ app.component('IconPhotoAnalyze',IconPhotoAnalyze)
 app.component('IconPhotoResult',IconPhotoResult)
 app.component('IconLogout',IconLogout)
 app.component('IconLogin',IconLogin)
+app.component('IconChat',IconChat)
 app.mount('#app');

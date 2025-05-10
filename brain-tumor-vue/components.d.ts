@@ -8,8 +8,10 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Chat: typeof import('./src/components/Chat.vue')['default']
     Dashboard: typeof import('./src/components/Dashboard.vue')['default']
     IconBrainLogo: typeof import('./src/components/icons/IconBrainLogo.vue')['default']
+    IconChat: typeof import('./src/components/icons/IconChat.vue')['default']
     IconCommunity: typeof import('./src/components/icons/IconCommunity.vue')['default']
     IconDocumentation: typeof import('./src/components/icons/IconDocumentation.vue')['default']
     IconEcosystem: typeof import('./src/components/icons/IconEcosystem.vue')['default']

@@ -14,6 +14,8 @@ import auth from './auth.js';
 import * as websocket from './websocket.js';
 import * as control from './control.js'; // Import the entire control module
 import photo from './photo.js'
+import chat from './chat.js';
+
 
 
 interface Config {
@@ -32,7 +34,8 @@ const app: Application = express();
 
 
 app.use(morgan('tiny'));
-app.use(cors());
+app.use(cors({  credentials: true, // 👈 This is critical to allow cookies/sessions
+}));
 app.use(bodyParser.json());
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(400).json({ error: err.message });
@@ -74,6 +77,9 @@ app.post(photo.endpoint, auth.checkIfInRole([0]), photo.post)
 app.put(photo.endpoint, auth.checkIfInRole([0]), photo.put)
 app.delete(photo.endpoint, auth.checkIfInRole([0]), photo.delete)
 
+app.get('/api/chat', auth.checkIfInRole([0, 1]), chat.get);
+app.post('/api/chat', auth.checkIfInRole([0, 1]), chat.post);
+
 
 
 try {
@@ -91,6 +97,7 @@ mongoose.connect(config.dbUrl)
 
         auth.init(conn);
         photo.init(conn.connection);
+        chat.init(conn.connection);
 
         app.listen(config.port, () => {
             console.log('Backend słucha na porcie', config.port);
