@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { emitter, useWebSocketStore } from '../stores/websocket';
 
 const message = ref('');
 const messages = ref<any[]>([]);
@@ -7,7 +8,8 @@ const userList = ref<any[]>([]);
 const receiver = ref('');
 const sender = ref('');
 
-// Fetch messages from DB based on selected receiver
+const wsStore = useWebSocketStore();
+
 const fetchMessages = async () => {
   if (!receiver.value) return;
 
@@ -18,13 +20,17 @@ const fetchMessages = async () => {
     if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
 
     const data = await res.json();
-    messages.value = data.reverse();
+    messages.value = data.reverse().map((msg: any) => ({
+      ...msg,
+      status: msg.status || 'delivered' // Use existing status or fallback
+    }));
+
+
   } catch (err) {
     console.error('Failed to fetch messages:', err);
   }
 };
 
-// Ensure the current user is identified
 const ensureSender = async () => {
   try {
     const res = await fetch('/api/auth', { credentials: 'include' });
@@ -33,6 +39,7 @@ const ensureSender = async () => {
     const data = await res.json();
     if (data.username) {
       sender.value = data.username;
+      wsStore.connect(sender.value);
       await fetchUsers();
     }
   } catch (err) {
@@ -40,7 +47,6 @@ const ensureSender = async () => {
   }
 };
 
-// Fetch available users
 const fetchUsers = async () => {
   if (!sender.value) return;
 
@@ -60,49 +66,85 @@ const fetchUsers = async () => {
   }
 };
 
-// When clicking a username, set the receiver and load messages
 const selectUser = async (username: string) => {
   receiver.value = username;
+  
+  // Mark messages as read immediately after selecting the user
+  wsStore.send({
+    type: 'read-receipt',
+    from: sender.value,
+    to: receiver.value
+  });
+
   await fetchMessages();
 };
 
-const sendMessage = async () => {
+const sendMessage = () => {
   if (!message.value.trim() || !receiver.value) return;
 
   const payload = {
-    sender: sender.value,
-    receiver: receiver.value,
+    from: sender.value,
+    to: receiver.value,
     message: message.value
   };
 
-  try {
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify(payload)
-    });
+  messages.value.push({
+    sender: sender.value,
+    receiver: receiver.value,
+    message: message.value,
+    timestamp: Date.now(),
+    status: 'sending'
+  });
 
-    if (res.ok) {
-      message.value = '';
-      await fetchMessages();
-    }
-  } catch (err) {
-    console.error('Failed to send message:', err);
+  wsStore.send(payload);
+  message.value = '';
+};
+
+const handleIncomingMessage = (data: any) => {
+  if (data.type === 'read-receipt') {
+    // Mark messages as read for this conversation
+    messages.value.forEach(msg => {
+      if (msg.receiver === data.from && msg.sender === data.to) {
+        msg.status = 'read';
+      }
+    });
+    return;
+  }
+
+  const existing = messages.value.find(msg =>
+    msg.message === data.message &&
+    msg.sender === data.from &&
+    msg.receiver === data.to &&
+    msg.status === 'sending'
+  );
+
+  if (existing) {
+    existing.status = 'delivered';
+  } else {
+    messages.value.push({
+      sender: data.from,
+      receiver: data.to,
+      message: data.message,
+      timestamp: Date.now(),
+      status: 'delivered'
+    });
   }
 };
 
 onMounted(async () => {
   await ensureSender();
+  emitter.on('new-message', handleIncomingMessage);
+});
+
+onBeforeUnmount(() => {
+  emitter.off('new-message', handleIncomingMessage);
 });
 </script>
 
-<!-- Chat.vue Updated Template for Message Alignment -->
 <template>
   <div class="p-6 max-w-4xl mx-auto">
     <h2 class="text-2xl font-bold mb-4">User Chat</h2>
 
-    <!-- User List -->
     <div class="mb-4">
       <label class="block text-sm font-medium mb-1">Users</label>
       <ul class="space-y-2">
@@ -120,18 +162,23 @@ onMounted(async () => {
       </ul>
     </div>
 
-    <!-- Chat Messages with Aligned Layout -->
     <div class="bg-white border border-gray-200 rounded-lg p-4 h-64 overflow-y-scroll mb-4 flex flex-col space-y-2">
       <div
         v-for="msg in messages"
-        :key="msg._id"
+        :key="msg._id || msg.timestamp"
         :class="msg.sender === sender ? 'self-end text-right bg-blue-100 text-blue-800 px-3 py-2 rounded-lg max-w-xs' : 'self-start text-left bg-gray-100 text-gray-800 px-3 py-2 rounded-lg max-w-xs'"
       >
         <strong>{{ msg.sender }}:</strong> {{ msg.message }}
+        <div v-if="msg.sender === sender" class="text-xs text-gray-500 mt-1">
+          {{
+            msg.status === 'sending' ? 'Sending…' :
+            msg.status === 'delivered' ? 'Delivered' :
+            msg.status === 'read' ? 'Read' : ''
+          }}
+        </div>
       </div>
     </div>
 
-    <!-- Message Input -->
     <div class="flex gap-2">
       <v-text-field
         v-model="message"
@@ -146,4 +193,3 @@ onMounted(async () => {
 </template>
 
 <style scoped></style>
-

@@ -2,12 +2,6 @@ import { Request, Response } from 'express';
 import auth from './auth';
 import {websocketHandler} from './websocket';
 
-interface UserSessions {
-    [username: string]: {
-        sessions?: number;
-        websocket?: boolean;
-    };
-}
 
 export const whoGet = async (req: Request, res: Response): Promise<void> => {
     try {

@@ -5,7 +5,8 @@ const chatSchema = new mongoose.Schema({
   sender: { type: String, required: true },
   receiver: { type: String, required: true },
   message: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now }
+  timestamp: { type: Date, default: Date.now },
+  status: { type: String, default: 'delivered' } // 'delivered' | 'read'
 });
 
 // Explicitly set the collection name to 'chat'

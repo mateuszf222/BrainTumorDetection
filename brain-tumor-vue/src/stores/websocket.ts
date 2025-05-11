@@ -1,4 +1,7 @@
 import { defineStore } from 'pinia'
+import mitt from 'mitt'; // Simple event bus
+const emitter = mitt();
+
 
 export const useWebSocketStore = defineStore('websocket', {
   state: () => ({
@@ -23,6 +26,7 @@ export const useWebSocketStore = defineStore('websocket', {
         const data = JSON.parse(event.data)
         console.log('📥 WebSocket message:', data)
         // You can emit events or update other stores here
+        emitter.emit('new-message', data); // Emit globally
       }
 
       ws.onclose = () => {
@@ -47,3 +51,4 @@ export const useWebSocketStore = defineStore('websocket', {
     }
   }
 })
+export { emitter };

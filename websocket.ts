@@ -1,8 +1,9 @@
 import { WebSocket } from 'ws';
 import { IncomingMessage } from 'node-http';
 import session from 'express-session';
+import chat from './chat.js';
+import { Session } from 'inspector/promises';
 type SessionStore = session.Store;
-
 
 type WebSocketMap = Record<string, WebSocket>;
 
@@ -21,44 +22,83 @@ export const websocketHandler = {
         const url = new URL(req.url || '', `http://${req.headers.host}`)
         const sessionID = url.searchParams.get('sessionID')
 
+        const typedSession = req.session as Session & { passport?: { user: string } };
+
         if (sessionID) {
             ws.sessionID = sessionID
             websocketMap[sessionID] = ws
             console.log(`WebSocket associated with session ${sessionID}`)
         }
 
-        ws.on('message', (rawData: string) => {
-            let data: { to?: string } = {};
+        ws.on('message', async (rawData) => {
             try {
-                data = JSON.parse(rawData);
-            } catch (err) {
-                console.error((err as Error).message, rawData);
-                return;
-            }
+                const dataStr = rawData.toString();
+                const data = JSON.parse(dataStr);
+        
+                if (data.type === 'read-receipt') {
+                    try {
+                        await chat.model.updateMany(
+                            { sender: data.to, receiver: data.from, status: { $ne: 'read' } },
+                            { $set: { status: 'read' } }
+                        );
 
-            req.sessionStore.all((err, sessions) => {
-                if (err) {
-                    console.error('Cannot retrieve sessions');
-                    return;
+                        // Notify sender that messages were read
+                        req.sessionStore.all((err, sessions) => {
+                            if (err) return console.error('Session store error:', err);
+
+                            for (const sessionID in sessions) {
+                                const session = sessions[sessionID];
+                                if (session.passport?.user === data.to && websocketMap[sessionID]) {
+                                    websocketMap[sessionID].send(JSON.stringify({
+                                        type: 'read-receipt',
+                                        from: data.from,
+                                        to: data.to
+                                    }));
+                                }
+                            }
+                        });
+                    } catch (err) {
+                        console.error('Failed to update messages to read status:', err);
+                    }
+                    return; // Skip further processing for this event
                 }
                 
-                for (const sessionID in sessions) {
-                    const session = sessions[sessionID] as any;
-                    if (
-                        websocketMap[sessionID] &&
-                        session.passport &&
-                        session.passport.user &&
-                        session.passport.user === data.to
-                    ) {
-                        try {
+        
+                // Standard message handling
+                if (!data.from || !data.to || !data.message) {
+                    console.warn('Invalid message received', data);
+                    return;
+                }
+        
+                // Save message to database
+                const chatMsg = new chat.model({
+                    sender: data.from,
+                    receiver: data.to,
+                    message: data.message
+                });
+                await chatMsg.save();
+        
+                // Forward the message to both sender and receiver for status updates
+                req.sessionStore.all((err, sessions) => {
+                    if (err) return console.error('Session store error:', err);
+        
+                    for (const sessionID in sessions) {
+                        const session = sessions[sessionID];
+                        if (
+                            (session.passport?.user === data.to || session.passport?.user === data.from) &&
+                            websocketMap[sessionID]
+                        ) {
                             websocketMap[sessionID].send(JSON.stringify(data));
-                        } catch (err) {
-                            console.error('WebSocket send error', (err as Error).message);
                         }
                     }
-                }
-            });
+                });
+        
+            } catch (err) {
+                console.error('Failed to process WebSocket message:', err);
+            }
         });
+        
+        
 
         ws.on('close', () => {
             if (ws.sessionID) {
