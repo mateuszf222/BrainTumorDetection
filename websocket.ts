@@ -65,16 +65,19 @@ export const websocketHandler = {
                 
         
                 // Standard message handling
-                if (!data.from || !data.to || !data.message) {
+                if (!data.from || !data.to || (!data.message && !data.image)) {
                     console.warn('Invalid message received', data);
                     return;
                 }
         
-                // Save message to database
+                // Save message to the database, including image if present
                 const chatMsg = new chat.model({
                     sender: data.from,
                     receiver: data.to,
-                    message: data.message
+                    message: data.message || null,
+                    image: data.image || null, // Store the image Base64 or reference here
+                    timestamp: Date.now(),
+                    status: 'delivered'
                 });
                 await chatMsg.save();
         

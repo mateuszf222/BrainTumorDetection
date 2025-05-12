@@ -1,10 +1,14 @@
 // chat.ts (Message Model and API Handlers)
 import mongoose from 'mongoose';
 
+import multer from 'multer';
+const upload = multer({ dest: 'uploads/' }); // Store uploaded files in /uploads/
+
 const chatSchema = new mongoose.Schema({
   sender: { type: String, required: true },
   receiver: { type: String, required: true },
-  message: { type: String, required: true },
+  message: { type: String },
+  image: { type: String }, // Add image field
   timestamp: { type: Date, default: Date.now },
   status: { type: String, default: 'delivered' } // 'delivered' | 'read'
 });
@@ -46,16 +50,24 @@ const chat = {
   ],
 
   post: [
+    upload.single('image'), // Handle optional image upload
     async (req, res) => {
       const { sender, receiver, message } = req.body;
-      if (!sender || !receiver || !message) {
+      const image = req.file?.filename;
+
+      if (!sender || !receiver || (!message && !image)) {
         return res.status(400).json({ error: 'Missing required fields.' });
       }
 
       try {
-        const chatMsg = new chat.model({ sender, receiver, message });
+        const chatMsg = new chat.model({
+          sender,
+          receiver,
+          message: message || null,
+          image: image || null
+        });
         await chatMsg.save();
-        res.status(201).json({ success: true });
+        res.status(201).json({ success: true, message: 'Message stored successfully.' });
       } catch (err: any) {
         res.status(500).json({ error: err.message });
       }
