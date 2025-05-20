@@ -2,7 +2,6 @@ import { WebSocket } from 'ws';
 import { IncomingMessage } from 'node-http';
 import session from 'express-session';
 import chat from './chat.js';
-import { Session } from 'inspector/promises';
 type SessionStore = session.Store;
 
 type WebSocketMap = Record<string, WebSocket>;
@@ -21,8 +20,6 @@ export const websocketHandler = {
 
         const url = new URL(req.url || '', `http://${req.headers.host}`)
         const sessionID = url.searchParams.get('sessionID')
-
-        const typedSession = req.session as Session & { passport?: { user: string } };
 
         if (sessionID) {
             ws.sessionID = sessionID

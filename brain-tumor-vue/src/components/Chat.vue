@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue';
 import { emitter, useWebSocketStore } from '../stores/websocket';
 
 const message = ref('');
@@ -10,6 +10,8 @@ const sender = ref('');
 const selectedImage = ref<File | null>(null);
 const fileInput = ref<HTMLInputElement | null>(null);
 const previewImageUrl = ref<string | null>(null);
+const chatContainer = ref<HTMLElement | null>(null);
+
 
 const wsStore = useWebSocketStore();
 
@@ -80,6 +82,7 @@ const selectUser = async (username: string) => {
   });
 
   await fetchMessages();
+  await scrollToBottom();
 };
 
 const handleFileUpload = (event: Event) => {
@@ -140,6 +143,7 @@ const sendMessage = async () => {
   });
 
   message.value = '';
+  scrollToBottom();
 };
 
 
@@ -168,9 +172,19 @@ const handleIncomingMessage = (data: any) => {
       sender: data.from,
       receiver: data.to,
       message: data.message,
+      image: data.image,  
       timestamp: Date.now(),
       status: 'delivered'
     });
+  }
+
+  scrollToBottom(); 
+};
+
+const scrollToBottom = async () => {
+  await nextTick(); // wait for DOM update
+  if (chatContainer.value) {
+    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
   }
 };
 
@@ -205,7 +219,10 @@ onBeforeUnmount(() => {
       </ul>
     </div>
 
-    <div class="bg-white border border-gray-200 rounded-lg p-4 h-64 overflow-y-scroll mb-4 flex flex-col space-y-2">
+    <div
+      ref="chatContainer"
+      class="bg-white border border-gray-200 rounded-lg p-4 h-64 overflow-y-scroll mb-4 flex flex-col space-y-2"
+    >
       <div v-for="msg in messages" :key="msg._id || msg.timestamp" 
           :class="msg.sender === sender ? 'self-end text-right bg-blue-100 text-blue-800 px-3 py-2 rounded-lg max-w-xs' : 'self-start text-left bg-gray-100 text-gray-800 px-3 py-2 rounded-lg max-w-xs'">
         <strong>{{ msg.sender }}:</strong> 
