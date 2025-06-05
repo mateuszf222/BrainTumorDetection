@@ -226,7 +226,7 @@ onBeforeUnmount(() => {
       <div v-for="msg in messages" :key="msg._id || msg.timestamp" 
           :class="msg.sender === sender ? 'self-end text-right bg-blue-100 text-blue-800 px-3 py-2 rounded-lg max-w-xs' : 'self-start text-left bg-gray-100 text-gray-800 px-3 py-2 rounded-lg max-w-xs'">
         <strong>{{ msg.sender }}:</strong> 
-        <span v-if="msg.message">{{ msg.message }}</span>
+        <span v-if="msg.message">{{ ` ${msg.message}` }}</span>
         
         <div v-if="msg.image">
           <img :src="msg.image" class="mt-2 max-w-xs max-h-48 object-contain rounded-lg" />

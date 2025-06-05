@@ -172,7 +172,7 @@ onMounted(() => {
           v-model="input.originalName"
           :readonly="true"
         />
-        <div v-if="input.photoData && input.photoData.data" class="mt-4">
+        <div v-if="input.photoData && input.photoData.data" class="mt-2">
           <p>Podgląd zdjęcia:</p>
           <img
             :src="generateImageUrl(input.photoData.data)"
@@ -180,7 +180,7 @@ onMounted(() => {
             style="max-width: 100%; max-height: 300px; border: 1px solid #ccc;"
           />
           <v-btn
-            class="mb-5 ml-6"
+            class="mb-5 mt-2"
             :href="generateImageUrl(input.photoData.data)"
             :download="input.originalName || 'analyzed.jpg'"
             color="secondary"

@@ -163,7 +163,7 @@ const resetForm = () => {
     </v-btn>
 
     <v-btn
-      class="mt-2"
+      class="mt-2 ml-2"
       color="secondary"
       :href="resultImageUrl"
       :download="downloadFilename"
