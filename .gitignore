@@ -1,28 +1,15 @@
-node_modules/
-package-lock.json
-.vscode/
-/config.json
-
 00056_110.jpg
 00060_70.jpg
 61 (5).jpg
 62 (3).jpg
 info.txt
 logi_z_treningu.txt
-pathTest.py
-yolo11m.pt
-yolo11n.pt
-yolov8l.pt
-yolov8m.pt
 brain-tumor
 runs
-.venv
 repomix-output.txt
-uploads
 praca_licencjacka.docx
 Fabich_Mateusz_praca_licencjacka.docx
 Fabich_Mateusz_praca_licencjacka.pdf
-
 
 
 

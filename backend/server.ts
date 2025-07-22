@@ -26,7 +26,7 @@ interface Config {
 
 let config: Config = {
     port: 8000,
-    frontend: './brain-tumor-vue/dist',
+    frontend: '../brain-tumor-vue/dist',
     dbUrl: 'mongodb://localhost:27017/pai2024'
 };
 
