@@ -79,7 +79,8 @@ const photo: {
         form.append('photo', fs.createReadStream(req.file.path), req.file.originalname)
   
         const fastApiResponse = await axios.post(
-          'http://localhost:8001/analyze', // or your container/service IP
+          // 'http://localhost:8001/analyze', // or your container/service IP
+          'http://backend-python:8001/analyze', // or your container/service IP
           form,
           { headers: form.getHeaders(), responseType: 'arraybuffer' }
         )

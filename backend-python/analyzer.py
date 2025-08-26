@@ -33,7 +33,8 @@ def run_tumor_detection(image_bytes):
         tmp_path = tmp.name
 
     # Load image and model, run prediction, return result
-    modelBest = YOLO("C:/Users/mateu/Desktop/6semestr/praca_licencjacka/runs/detect/train/weights/best.pt")
+    # modelBest = YOLO("C:/Users/mateu/Desktop/6semestr/praca_licencjacka/runs/detect/train/weights/best.pt")
+    modelBest = YOLO("weights/best.pt")
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print(f"Using device: {device}")

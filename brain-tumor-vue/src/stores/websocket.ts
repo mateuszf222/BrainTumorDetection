@@ -14,7 +14,9 @@ export const useWebSocketStore = defineStore('websocket', {
     connect(sessionID: string) {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) return
 
-      const ws = new WebSocket(`ws://${window.location.host}/ws?sessionID=${sessionID}`)
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${protocol}//${window.location.host}/ws?sessionID=${sessionID}`);
+
       this.sessionID = sessionID
 
       ws.onopen = () => {
