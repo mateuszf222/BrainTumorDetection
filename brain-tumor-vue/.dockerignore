@@ -1,0 +1,21 @@
+# Katalogi builda i zależności
+node_modules
+dist
+
+# Logi
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Pliki środowiskowe
+.env
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Systemowe
+.DS_Store
+Thumbs.db
