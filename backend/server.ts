@@ -27,7 +27,8 @@ interface Config {
 let config: Config = {
     port: 8000,
     frontend: '../brain-tumor-vue/dist',
-    dbUrl: 'mongodb://localhost:27017/pai2024'
+    dbUrl: process.env.DB_URL || 'mongodb://localhost:27017/pai2024'
+
 };
 
 const app: Application = express();
@@ -84,7 +85,8 @@ app.post('/api/chat', auth.checkIfInRole([0, 1]), chat.post);
 
 try {
     const configData = fs.readFileSync('config.json', 'utf-8');
-    config = JSON.parse(configData);
+    const fileConfig = JSON.parse(configData);
+    config = { ...config, ...fileConfig };  // nadpisuje tylko jeśli coś jest w pliku
     console.log('Konfiguracja z config.json');
 } catch (err) {
     console.log('Konfiguracja domyślna');
