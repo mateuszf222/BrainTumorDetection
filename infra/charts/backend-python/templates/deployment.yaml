@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backend-python.fullname" . }}
+  labels:
+    {{- include "backend-python.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend-python
+  template:
+    metadata:
+      labels:
+        app: backend-python
+    spec:
+      containers:
+      - name: backend-python
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+          - containerPort: {{ .Values.service.targetPort }}
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}

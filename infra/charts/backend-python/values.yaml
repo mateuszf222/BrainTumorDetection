@@ -1,0 +1,21 @@
+replicaCount: 1
+
+fullnameOverride: backend-python
+
+image:
+  repository: 106342565607.dkr.ecr.eu-north-1.amazonaws.com/brain-tumor-backend-python
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 8001
+  targetPort: 8001
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 800Mi
+  limits:
+    cpu: 1
+    memory: 800Mi

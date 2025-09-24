@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "backend.fullname" . }}
+  labels:
+    app: backend
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: backend-db-url
+                  key: dbUrl
+          volumeMounts:
+            - name: config-volume
+              mountPath: /praca_licencjacka/config.json
+              subPath: config.json
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Values.configMapName }}

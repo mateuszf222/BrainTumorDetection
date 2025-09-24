@@ -1,0 +1,6 @@
+    - name: Create Kubernetes Secret (dbUrl)
+      run: |
+        kubectl create secret generic backend-db-url \
+          --from-literal=dbUrl="${{ secrets.DB_URL }}" \
+          --namespace default \
+          --dry-run=client -o yaml | kubectl apply -f -

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: {{ .Values.configMapName }}
+data:
+  config.json: |
+    {
+      "port": {{ .Values.config.port }},
+      "frontend": "{{ .Values.config.frontend }}"
+    }
